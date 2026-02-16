@@ -1,9 +1,8 @@
 const XLSX = require('xlsx');
 const path = require('path');
-const readline = require('readline');
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const ask = (q) => new Promise(resolve => rl.question(q, resolve));
+// Path ke file template PO Accurate (disimpan di folder script)
+const TEMPLATE_PATH = path.join(__dirname, 'template', 'purchase-order-import-file.xlsx');
 
 function parseDN(filePath) {
   const wb = XLSX.readFile(filePath);
@@ -261,32 +260,41 @@ async function main() {
   // Generate PO data
   const poData = generatePO(dnData, noPemasok.trim(), entity);
 
-  // Create workbook
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(poData);
-  XLSX.utils.book_append_sheet(wb, ws, 'Template Pesanan Pembelian');
+  // Create workbook from template (copy all sheets including explanations)
+  let wb;
+  try {
+    wb = XLSX.readFile(TEMPLATE_PATH);
+    // Replace the first sheet data with our generated PO data
+    const ws = XLSX.utils.aoa_to_sheet(poData);
+    wb.Sheets[wb.SheetNames[0]] = ws;
+    console.log('Template Accurate ditemukan, menggunakan format template asli.');
+  } catch (e) {
+    // Fallback: create new workbook if template not found
+    console.log('Template tidak ditemukan, membuat file baru.');
+    wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(poData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Template Pesanan Pembelian');
+  }
 
   // Output file name
   const dnBaseName = dnData.dnNumber.replace(/\//g, '-') || 'DN';
   const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const outputFileName = `PO-${entity}-dari-${dnBaseName}-${timestamp}.xlsx`;
+  const timeDetail = new Date().toTimeString().slice(0,8).replace(/:/g,'');
+  const outputFileName = `PO-${entity}-dari-${dnBaseName}-${timestamp}-${timeDetail}.xlsx`;
   const outputDir = path.dirname(dnFile);
   const outputPath = path.join(outputDir, outputFileName);
 
   XLSX.writeFile(wb, outputPath);
 
-  console.log(`\n✅ File PO berhasil dibuat!`);
+  console.log(`\n File PO berhasil dibuat!`);
   console.log(`   File: ${outputPath}`);
   console.log(`   Entity: ${entity}`);
   console.log(`   Pemasok: ${noPemasok.trim()}`);
   console.log(`   Keterangan: PO dari ${dnData.dnNumber}`);
   console.log(`   Items: ${dnData.items.length} SKU`);
   console.log(`\n   Silakan import file ini di Accurate Online ${entity}.`);
-
-  rl.close();
 }
 
 main().catch(err => {
   console.error('Error:', err.message);
-  rl.close();
 });
