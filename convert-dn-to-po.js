@@ -134,27 +134,21 @@ async function main() {
   console.log('============================================');
   console.log('');
   console.log('Penggunaan:');
-  console.log('  node convert-dn-to-po.js <file_dn> <entitas> <no_pemasok>');
-  console.log('  Contoh: node convert-dn-to-po.js dn.xlsx MBB V.00001');
+  console.log('  node convert-dn-to-po.js <file_dn> <entitas>');
+  console.log('  Contoh: node convert-dn-to-po.js dn.xlsx MBB');
   console.log('');
 
   const dnFile = (process.argv[2] || '').replace(/"/g, '').trim();
   const entity = (process.argv[3] || '').toUpperCase().trim();
-  const noPemasok = (process.argv[4] || '').trim();
 
   if (!dnFile) {
     console.log('Error: Path file DN tidak boleh kosong.');
-    console.log('Contoh: node convert-dn-to-po.js "C:\\path\\dn.xlsx" MBB V.00001');
+    console.log('Contoh: node convert-dn-to-po.js "C:\\path\\dn.xlsx" MBB');
     return;
   }
   if (!entity || !['MBB', 'UBB'].includes(entity)) {
     console.log('Error: Entitas harus MBB atau UBB.');
-    console.log('Contoh: node convert-dn-to-po.js "C:\\path\\dn.xlsx" MBB V.00001');
-    return;
-  }
-  if (!noPemasok) {
-    console.log('Error: No Pemasok wajib diisi.');
-    console.log('Contoh: node convert-dn-to-po.js "C:\\path\\dn.xlsx" MBB V.00001');
+    console.log('Contoh: node convert-dn-to-po.js "C:\\path\\dn.xlsx" MBB');
     return;
   }
 
@@ -171,7 +165,6 @@ async function main() {
   console.log(`Total Item : ${dnData.items.length} SKU`);
   console.log(`Total Qty  : ${dnData.items.reduce((s, i) => s + i.qty, 0)} pairs`);
   console.log(`Entitas    : ${entity}`);
-  console.log(`No Pemasok : ${noPemasok}`);
   console.log('');
 
   // --- Build workbook using ExcelJS (with template as base) ---
@@ -265,7 +258,7 @@ async function main() {
   headerData[0] = 'HEADER';
   headerData[1] = '';                // No Form (auto)
   headerData[2] = tglPesanan;
-  headerData[3] = noPemasok;
+  headerData[3] = '';                // No Pemasok (diisi manual di Accurate)
   headerData[4] = '';                // Alamat Kirim
   headerData[5] = 'Ya';             // Kena PPN
   headerData[6] = 'Ya';             // Total Termasuk PPN
@@ -300,7 +293,7 @@ async function main() {
   console.log('File PO berhasil dibuat!');
   console.log(`   File: ${outputPath}`);
   console.log(`   Entity: ${entity}`);
-  console.log(`   Pemasok: ${noPemasok}`);
+  console.log(`   Pemasok: (diisi manual di Accurate)`);
   console.log(`   Keterangan: ${keterangan}`);
   console.log(`   Items: ${dnData.items.length} SKU`);
   console.log('');

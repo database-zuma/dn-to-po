@@ -28,7 +28,7 @@ npm install
 ## Cara Penggunaan
 
 ```bash
-node convert-dn-to-po.js <file_DN> <entitas> <no_pemasok>
+node convert-dn-to-po.js <file_DN> <entitas>
 ```
 
 ### Parameter
@@ -36,24 +36,23 @@ node convert-dn-to-po.js <file_DN> <entitas> <no_pemasok>
 |-----------|-----------|--------|
 | `file_DN` | Path ke file DN (.xlsx) yang diexport dari Accurate DDD | `"C:\Downloads\dn.xlsx"` |
 | `entitas` | Entitas tujuan PO: `MBB` atau `UBB` | `MBB` |
-| `no_pemasok` | No Pemasok / Supplier ID DDD di Accurate entitas tujuan | `V.00001` |
 
 ### Contoh
 
 ```bash
 # Generate PO untuk MBB
-node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" MBB V.00001
+node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" MBB
 
 # Generate PO untuk UBB
-node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" UBB V.00002
+node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" UBB
 ```
 
 ### Output
 File PO akan disimpan di folder yang sama dengan file DN input, dengan nama:
 ```
-PO-{ENTITAS}-dari-{NO_DN}-{TANGGAL}.xlsx
+PO-{ENTITAS}-dari-{NO_DN}-{TANGGAL}-{JAM}.xlsx
 ```
-Contoh: `PO-MBB-dari-DN-DDD-WHB-2026-II-021-20260216.xlsx`
+Contoh: `PO-MBB-dari-DN-DDD-WHB-2026-II-021-20260216-104528.xlsx`
 
 ## Mapping Data DN ke PO
 
@@ -62,7 +61,7 @@ Contoh: `PO-MBB-dari-DN-DDD-WHB-2026-II-021-20260216.xlsx`
 |----------|--------|------------|
 | No Form | - | Dikosongkan, auto-generate oleh Accurate |
 | Tgl Pesanan | Tanggal DN | Format DD/MM/YYYY |
-| No Pemasok | Input user | ID supplier DDD di Accurate MBB/UBB |
+| No Pemasok | - | Dikosongkan, diisi manual di Accurate |
 | Kena PPN | Ya | Transaksi internal kena PPN |
 | Total Termasuk PPN | Ya | |
 | Keterangan | No DN | `PO dari DN/DDD/WHB/2026/II/021` |
@@ -86,16 +85,18 @@ File export "Pengiriman Pesanan" dari Accurate Online DDD dengan struktur:
 - Mendukung multi-halaman (page break)
 
 ### Output: PO Import
-File Excel sesuai template import "Pesanan Pembelian" Accurate Online:
-- Row 0: Label kolom HEADER
-- Row 1: Label kolom ITEM
-- Row 2: Label kolom EXPENSE
-- Row 3+: Data (HEADER diikuti ITEM rows)
+File Excel sesuai template import "Pesanan Pembelian" Accurate Online (sama persis dengan template asli):
+- 4 Sheet: Template Pesanan Pembelian + 3 sheet Penjelasan Kolom
+- Warna: HEADER (hijau), ITEM (biru), EXPENSE (orange) - sesuai template Accurate
+- Row 1-3: Label kolom (HEADER / ITEM / EXPENSE) dengan warna full row
+- Row 4+: Data (hanya kolom A berwarna)
 
 ## Dependencies
-- [xlsx](https://www.npmjs.com/package/xlsx) - Library untuk baca/tulis file Excel
+- [xlsx](https://www.npmjs.com/package/xlsx) - Library untuk baca file Excel (DN)
+- [exceljs](https://www.npmjs.com/package/exceljs) - Library untuk tulis file Excel dengan styling/warna
 
 ## Catatan
-- Harga satuan **tidak** diisi otomatis dari DN (karena DN tidak mengandung harga). Harga perlu diisi manual di Accurate setelah import atau menggunakan daftar harga yang sudah ada.
-- No Pemasok DDD **berbeda** di setiap entitas (MBB dan UBB), pastikan menggunakan kode yang benar.
+- Harga satuan **tidak** diisi otomatis dari DN (karena DN tidak mengandung harga). Harga perlu diisi manual di Accurate setelah import.
+- No Pemasok (Supplier ID DDD) **tidak** diisi otomatis. Diisi manual di Accurate saat import.
 - Nomor DN DDD akan tercatat di kolom **Keterangan** PO sebagai referensi.
+- File template Accurate asli disimpan di folder `template/` untuk menjaga format yang konsisten.
