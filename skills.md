@@ -8,6 +8,8 @@ Script Node.js untuk mengkonversi file **Delivery Note (DN)** dari entitas **DDD
 
 > **PENTING:** Setiap DN yang diproses **WAJIB menghasilkan 2 output** (PO + Invoice).
 
+> **FORMAT FILE:** Mendukung **PDF** dan **Excel (.xlsx)** — script auto-detect file extension.
+
 ## Latar Belakang
 ZUMA adalah perusahaan produksi sandal yang memiliki 4 entitas:
 - **LJBB** - CV Lancar Jaya Besar Bersama
@@ -49,12 +51,13 @@ node convert-dn-to-po.js <file_DN> <entitas>
 
 | Script | Parameter | Keterangan |
 |--------|-----------|-----------|
-| `convert-dn-to-invoice.js` | `file_DN` | Path file DN (.xlsx) dari Accurate DDD |
-| `convert-dn-to-po.js` | `file_DN` | Path file DN (.xlsx) dari Accurate DDD |
+| `convert-dn-to-invoice.js` | `file_DN` | Path file DN (**PDF** atau **.xlsx**) dari Accurate DDD |
+| `convert-dn-to-po.js` | `file_DN` | Path file DN (**PDF** atau **.xlsx**) dari Accurate DDD |
 | `convert-dn-to-po.js` | `entitas` | `MBB` atau `UBB` |
 
 ### Contoh Lengkap (1 DN = 2 output)
 
+**Dari Excel:**
 ```bash
 # 1. Invoice untuk DDD
 node convert-dn-to-invoice.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx"
@@ -62,6 +65,17 @@ node convert-dn-to-invoice.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx"
 # 2. PO untuk MBB
 node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" MBB
 ```
+
+**Dari PDF:**
+```bash
+# 1. Invoice untuk DDD
+node convert-dn-to-invoice.js "C:\Users\ZUMA\Downloads\dn_pluit.pdf"
+
+# 2. PO untuk MBB
+node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\dn_pluit.pdf" MBB
+```
+
+**Format file auto-detected** — script membaca extension `.pdf` atau `.xlsx` dan menggunakan parser yang sesuai.
 
 ### Output Files
 ```
@@ -136,6 +150,7 @@ Kedua file output sama persis dengan template Accurate asli:
 ## Dependencies
 - [xlsx](https://www.npmjs.com/package/xlsx) - Library untuk baca file Excel (DN & Master Harga)
 - [exceljs](https://www.npmjs.com/package/exceljs) - Library untuk tulis file Excel dengan styling/warna
+- [pdf-parse](https://www.npmjs.com/package/pdf-parse) - Library untuk ekstrak text dari PDF
 
 ## File Template
 Disimpan di folder `template/`:
@@ -143,10 +158,21 @@ Disimpan di folder `template/`:
 - `sales-invoice-import-file-id.xlsx` - Template Invoice Accurate
 - `Master Harga.xlsx` - Data master harga (sheet UBB & MBB)
 
+## Warehouse Coverage
+Script mendukung **semua warehouse DDD**:
+- **Warehouse Bali Gatsu - Box** (WHB) — Gudang Bali
+- **Warehouse Pluit** (WHJ) — Gudang Jakarta
+- Dan warehouse lainnya
+
+Harga diambil dari **Master Harga** sheet MBB/UBB (coverage 5000+ SKU), tidak bergantung pada warehouse tertentu.
+
 ## Catatan
+- **Format file:** Mendukung PDF dan Excel (.xlsx) — auto-detect extension
+- **PDF parsing:** Script extract DN number, date, warehouse, dan items dari text PDF
 - Setiap DN **WAJIB menghasilkan 2 output**: Invoice (DDD) + PO (MBB/UBB)
 - Harga satuan otomatis dari **Master Harga** (kolom Harga After Diskon)
 - No Pelanggan dan No Pemasok **tidak** diisi otomatis, diisi manual di Accurate
 - Nomor DN tercatat di kolom **Keterangan** sebagai referensi
 - Tgl Pengiriman di Invoice = sama dengan Tgl Faktur
 - Nama Gudang di Invoice diambil dari DN
+- **Tested:** DN/DDD/WHB/2026/II/021 (Bali), DN/DDD/WHJ/2026/II/007 (Jakarta Pluit)
