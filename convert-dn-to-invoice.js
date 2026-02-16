@@ -272,7 +272,7 @@ async function main() {
   headerData[5] = 'Ya';             // Kena PPN
   headerData[6] = 'Ya';             // Total Termasuk PPN
   headerData[7] = '';                // Nomor Faktur Pajak
-  headerData[8] = 'Tidak';          // Faktur Dimuka
+  headerData[8] = '';                // Faktur Dimuka (kosong)
   headerData[9] = '';                // Diskon Faktur (%)
   headerData[10] = '';               // Diskon Faktur (Rp)
   headerData[11] = keterangan;       // Keterangan
