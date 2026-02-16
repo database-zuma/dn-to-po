@@ -159,10 +159,12 @@ Disimpan di folder `template/`:
 - `Master Harga.xlsx` - Data master harga (sheet UBB & MBB)
 
 ## Warehouse Coverage
-Script mendukung **semua warehouse DDD**:
-- **Warehouse Bali Gatsu - Box** (WHB) — Gudang Bali
-- **Warehouse Pluit** (WHJ) — Gudang Jakarta
-- Dan warehouse lainnya
+Script mendukung **semua warehouse DDD** (nama gudang diambil langsung dari DN):
+- **Warehouse Bali Gatsu - Box**
+- **Warehouse Pluit**
+- Dan warehouse lainnya sesuai nama di Accurate
+
+Nama gudang di output Invoice/PO akan **exact match** dengan nama di DN (tidak dimodifikasi).
 
 Harga diambil dari **Master Harga** sheet MBB/UBB (coverage 5000+ SKU), tidak bergantung pada warehouse tertentu.
 
@@ -174,5 +176,5 @@ Harga diambil dari **Master Harga** sheet MBB/UBB (coverage 5000+ SKU), tidak be
 - No Pelanggan dan No Pemasok **tidak** diisi otomatis, diisi manual di Accurate
 - Nomor DN tercatat di kolom **Keterangan** sebagai referensi
 - Tgl Pengiriman di Invoice = sama dengan Tgl Faktur
-- Nama Gudang di Invoice diambil dari DN
-- **Tested:** DN/DDD/WHB/2026/II/021 (Bali), DN/DDD/WHJ/2026/II/007 (Jakarta Pluit)
+- **Nama Gudang di Invoice = exact match dari DN** (tidak dimodifikasi)
+- **Tested:** DN/DDD/WHB/2026/II/021 (Warehouse Bali Gatsu - Box), DN/DDD/WHJ/2026/II/007 (Warehouse Pluit)
