@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
+const { loadHarga, detectEntity } = require('./load-harga');
 
 // Path ke file template Invoice Accurate
 const TEMPLATE_PATH = path.join(__dirname, 'template', 'sales-invoice-import-file-id.xlsx');
@@ -166,6 +167,16 @@ async function main() {
   console.log(`Total Qty  : ${dnData.items.reduce((s, i) => s + i.qty, 0)} pairs`);
   console.log('');
 
+  // Detect entity from customer name and load harga
+  const entity = detectEntity(dnData.customerName);
+  let hargaMap = new Map();
+  if (entity) {
+    console.log(`Entity terdeteksi: ${entity} (dari customer: ${dnData.customerName})`);
+    hargaMap = loadHarga(entity);
+  } else {
+    console.log('Warning: Entity tidak terdeteksi dari customer name. Harga tidak diisi.');
+  }
+
   // --- Build workbook using ExcelJS ---
   const wb = new ExcelJS.Workbook();
 
@@ -267,18 +278,24 @@ async function main() {
   headerData[11] = keterangan;       // Keterangan
   headerData[12] = '';               // Nama Cabang
   headerData[13] = '';               // No PO
+  headerData[14] = '';               // Pengiriman
+  headerData[15] = tglFaktur;       // Tgl Pengiriman = sama dengan Tgl Faktur
   const r4 = ws.addRow(headerData);
   applyCellStyle(r4, 1, STYLES.HEADER);
 
   // --- Item rows (only column A gets color) ---
+  let missingHarga = 0;
   for (const item of dnData.items) {
+    const harga = hargaMap.get(item.kode) || 0;
+    if (!harga && hargaMap.size > 0) missingHarga++;
+
     const itemData = new Array(COL_COUNT).fill('');
     itemData[0] = 'ITEM';
     itemData[1] = item.kode;         // Kode Barang
     itemData[2] = item.nama;         // Nama Barang
     itemData[3] = item.qty;          // Kuantitas
     itemData[4] = item.unit;         // Satuan
-    itemData[5] = '';                // Harga Satuan (diisi manual)
+    itemData[5] = harga || '';       // Harga Satuan (after diskon dari Master Harga)
     itemData[6] = '';                // Diskon Barang (%)
     itemData[7] = '';                // Diskon Barang (Rp)
     itemData[8] = '';                // Catatan Barang
@@ -304,8 +321,13 @@ async function main() {
   console.log('File Invoice berhasil dibuat!');
   console.log(`   File: ${outputPath}`);
   console.log(`   Untuk: DDD (PT. Dream Dare Discover)`);
-  console.log(`   Pelanggan: (diisi manual di Accurate)`);
+  console.log(`   Pelanggan: ${dnData.customerName} (${entity || '?'}) - No Pelanggan diisi manual`);
   console.log(`   Gudang: ${dnData.warehouse}`);
+  console.log(`   Tgl Pengiriman: ${tglFaktur} (sama dengan Tgl Faktur)`);
+  console.log(`   Harga: Master Harga ${entity || '-'} (after diskon)`);
+  if (missingHarga > 0) {
+    console.log(`   WARNING: ${missingHarga} SKU tidak ditemukan di Master Harga!`);
+  }
   console.log(`   Keterangan: ${keterangan}`);
   console.log(`   Items: ${dnData.items.length} SKU`);
   console.log('');

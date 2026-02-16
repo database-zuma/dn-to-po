@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
+const { loadHarga } = require('./load-harga');
 
 // Path ke file template PO Accurate (disimpan di folder script)
 const TEMPLATE_PATH = path.join(__dirname, 'template', 'purchase-order-import-file.xlsx');
@@ -167,6 +168,9 @@ async function main() {
   console.log(`Entitas    : ${entity}`);
   console.log('');
 
+  // Load harga dari Master Harga
+  const hargaMap = loadHarga(entity);
+
   // --- Build workbook using ExcelJS (with template as base) ---
   const wb = new ExcelJS.Workbook();
 
@@ -268,13 +272,18 @@ async function main() {
   applyCellStyle(r4, 1, STYLES.HEADER);
 
   // --- Item rows (only column A gets color) ---
+  let missingHarga = 0;
   for (const item of dnData.items) {
+    const harga = hargaMap.get(item.kode) || 0;
+    if (!harga && hargaMap.size > 0) missingHarga++;
+
     const itemData = new Array(COL_COUNT).fill('');
     itemData[0] = 'ITEM';
     itemData[1] = item.kode;
     itemData[2] = item.nama;
     itemData[3] = item.qty;
     itemData[4] = item.unit;
+    itemData[5] = harga || '';       // Harga Satuan (after diskon dari Master Harga)
     const ri = ws.addRow(itemData);
     applyCellStyle(ri, 1, STYLES.ITEM);
   }
@@ -292,6 +301,10 @@ async function main() {
   console.log(`   File: ${outputPath}`);
   console.log(`   Entity: ${entity}`);
   console.log(`   Pemasok: (diisi manual di Accurate)`);
+  console.log(`   Harga: Master Harga ${entity} (after diskon)`);
+  if (missingHarga > 0) {
+    console.log(`   WARNING: ${missingHarga} SKU tidak ditemukan di Master Harga!`);
+  }
   console.log(`   Keterangan: ${keterangan}`);
   console.log(`   Items: ${dnData.items.length} SKU`);
   console.log('');
