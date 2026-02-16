@@ -50,9 +50,9 @@ node convert-dn-to-po.js "C:\Users\ZUMA\Downloads\pengiriman_pesanan.xlsx" UBB
 ### Output
 File PO akan disimpan di folder yang sama dengan file DN input, dengan nama:
 ```
-PO-{ENTITAS}-dari-{NO_DN}-{TANGGAL}-{JAM}.xlsx
+PO-{ENTITAS}-dari-{NO_DN}.xlsx
 ```
-Contoh: `PO-MBB-dari-DN-DDD-WHB-2026-II-021-20260216-104528.xlsx`
+Contoh: `PO-MBB-dari-DN-DDD-WHB-2026-II-021.xlsx`
 
 ## Mapping Data DN ke PO
 
