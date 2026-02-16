@@ -95,8 +95,41 @@ File Excel sesuai template import "Pesanan Pembelian" Accurate Online (sama pers
 - [xlsx](https://www.npmjs.com/package/xlsx) - Library untuk baca file Excel (DN)
 - [exceljs](https://www.npmjs.com/package/exceljs) - Library untuk tulis file Excel dengan styling/warna
 
+## Workflow Delivery
+
+### 1. Generate PO
+```bash
+node convert-dn-to-po.js <file_DN> <entitas>
+```
+
+### 2. Upload ke Google Drive
+```bash
+gog drive upload <output_file> --name "PO-{ENTITAS}-dari-{NO_DN}.xlsx" --json
+gog drive share <file_id> --email wayan@zuma.id --role writer
+gog drive share <file_id> --email database@zuma.id --role writer
+gog drive share <file_id> --anyone --role reader
+```
+
+### 3. Kirim ke User
+**Format standar:**
+```
+📄 **PO-{ENTITAS}-dari-{NO_DN}**
+
+{NO_DN}
+{X} SKU, {Y} pairs
+Tanggal: {TANGGAL}
+
+🔗 **Google Sheets:**
+{GSHEET_LINK}
+```
+
+Kirim bersamaan:
+- File Excel (attachment)
+- Google Sheets link (di caption)
+
 ## Catatan
 - Harga satuan **tidak** diisi otomatis dari DN (karena DN tidak mengandung harga). Harga perlu diisi manual di Accurate setelah import.
 - No Pemasok (Supplier ID DDD) **tidak** diisi otomatis. Diisi manual di Accurate saat import.
 - Nomor DN DDD akan tercatat di kolom **Keterangan** PO sebagai referensi.
 - File template Accurate asli disimpan di folder `template/` untuk menjaga format yang konsisten.
+- **Filename:** Tanpa timestamp — cukup nomor DN aja (clean & predictable)
