@@ -3,6 +3,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const { loadHarga } = require('./load-harga');
+const { parseDNPdf } = require('./parse-dn-pdf');
 
 // Path ke file template PO Accurate (disimpan di folder script)
 const TEMPLATE_PATH = path.join(__dirname, 'template', 'purchase-order-import-file.xlsx');
@@ -23,7 +24,14 @@ const STYLES = {
   }
 };
 
-function parseDN(filePath) {
+async function parseDN(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  
+  if (ext === '.pdf') {
+    return await parseDNPdf(filePath);
+  }
+  
+  // Excel parsing (default)
   const wb = XLSX.readFile(filePath);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
@@ -156,7 +164,7 @@ async function main() {
   console.log(`Membaca file DN: ${dnFile}`);
   console.log('');
 
-  const dnData = parseDN(dnFile);
+  const dnData = await parseDN(dnFile);
 
   console.log('--- Info DN ---');
   console.log(`No DN      : ${dnData.dnNumber}`);

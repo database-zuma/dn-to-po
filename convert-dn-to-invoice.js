@@ -3,6 +3,7 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const { loadHarga, detectEntity } = require('./load-harga');
+const { parseDNPdf } = require('./parse-dn-pdf');
 
 // Path ke file template Invoice Accurate
 const TEMPLATE_PATH = path.join(__dirname, 'template', 'sales-invoice-import-file-id.xlsx');
@@ -23,15 +24,13 @@ const STYLES = {
   }
 };
 
-function parseDN(filePath) {
+async function parseDN(filePath) {
   const ext = path.extname(filePath).toLowerCase();
 
   if (ext === '.xlsx' || ext === '.xls') {
     return parseDNExcel(filePath);
   } else if (ext === '.pdf') {
-    console.log('Error: PDF parsing belum didukung langsung.');
-    console.log('Silakan export DN dalam format Excel (.xlsx) dari Accurate.');
-    process.exit(1);
+    return await parseDNPdf(filePath);
   }
   console.log('Error: Format file tidak didukung:', ext);
   process.exit(1);
@@ -156,7 +155,7 @@ async function main() {
   console.log(`Membaca file DN: ${dnFile}`);
   console.log('');
 
-  const dnData = parseDN(dnFile);
+  const dnData = await parseDN(dnFile);
 
   console.log('--- Info DN ---');
   console.log(`No DN      : ${dnData.dnNumber}`);
