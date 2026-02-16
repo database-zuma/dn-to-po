@@ -121,6 +121,12 @@ function applyRowStyle(row, style, colCount) {
   }
 }
 
+function applyCellStyle(row, colIndex, style) {
+  const cell = row.getCell(colIndex);
+  cell.fill = style.fill;
+  cell.font = style.font;
+}
+
 async function main() {
   console.log('============================================');
   console.log('  ZUMA - Konversi DN (DDD) ke PO Import');
@@ -251,7 +257,7 @@ async function main() {
   const r3 = ws.addRow(expenseLabels);
   applyRowStyle(r3, STYLES.EXPENSE, COL_COUNT);
 
-  // --- Row 4: HEADER data ---
+  // --- Row 4: HEADER data (only column A gets color) ---
   const tglPesanan = convertDateToAccurate(dnData.dnDate);
   const keterangan = `PO dari ${dnData.dnNumber}`;
 
@@ -266,9 +272,9 @@ async function main() {
   headerData[9] = keterangan;
   headerData[15] = 'IDR';
   const r4 = ws.addRow(headerData);
-  applyRowStyle(r4, STYLES.HEADER, COL_COUNT);
+  applyCellStyle(r4, 1, STYLES.HEADER);
 
-  // --- Item rows ---
+  // --- Item rows (only column A gets color) ---
   for (const item of dnData.items) {
     const itemData = new Array(COL_COUNT).fill('');
     itemData[0] = 'ITEM';
@@ -277,7 +283,7 @@ async function main() {
     itemData[3] = item.qty;
     itemData[4] = item.unit;
     const ri = ws.addRow(itemData);
-    applyRowStyle(ri, STYLES.ITEM, COL_COUNT);
+    applyCellStyle(ri, 1, STYLES.ITEM);
   }
 
   // --- Output ---
