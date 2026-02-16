@@ -282,8 +282,7 @@ async function main() {
   // --- Output ---
   const dnBaseName = dnData.dnNumber.replace(/\//g, '-') || 'DN';
   const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const timeDetail = new Date().toTimeString().slice(0,8).replace(/:/g,'');
-  const outputFileName = `PO-${entity}-dari-${dnBaseName}-${timestamp}-${timeDetail}.xlsx`;
+  const outputFileName = `PO-${entity}-dari-${dnBaseName}-${timestamp}.xlsx`;
   const outputDir = path.dirname(dnFile);
   const outputPath = path.join(outputDir, outputFileName);
 
